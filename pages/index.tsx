@@ -1,106 +1,48 @@
-import { ConnectWallet } from "@thirdweb-dev/react";
-import styles from "../styles/Home.module.css";
-import Image from "next/image";
-import { NextPage } from "next";
+import { useState, useRef } from 'react';
+import styles from '../styles/Home.module.css';
 
-const Home: NextPage = () => {
+const Home: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [streamStarted, setStreamStarted] = useState<boolean>(false);
+
+  const getVideoStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      console.log('Got stream:', stream); // This should log the MediaStream object
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch((error) => console.error('Error playing the video stream:', error));
+        setStreamStarted(true);
+      }
+    } catch (error) {
+      console.error('Error accessing the webcam:', error);
+    }
+  };
+
   return (
     <main className={styles.main}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            Welcome to{" "}
-            <span className={styles.gradientText0}>
-              <a
-                href="https://thirdweb.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                thirdweb.
-              </a>
-            </span>
-          </h1>
-
-          <p className={styles.description}>
-            Get started by configuring your desired network in{" "}
-            <code className={styles.code}>src/index.js</code>, then modify the{" "}
-            <code className={styles.code}>src/App.js</code> file!
-          </p>
-
-          <div className={styles.connect}>
-            <ConnectWallet
-              dropdownPosition={{
-                side: "bottom",
-                align: "center",
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://portal.thirdweb.com/"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/portal-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText1}>Portal ➜</h2>
-              <p>
-                Guides, references, and resources that will help you build with
-                thirdweb.
-              </p>
-            </div>
-          </a>
-
-          <a
-            href="https://thirdweb.com/dashboard"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/dashboard-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText2}>Dashboard ➜</h2>
-              <p>
-                Deploy, configure, and manage your smart contracts from the
-                dashboard.
-              </p>
-            </div>
-          </a>
-
-          <a
-            href="https://thirdweb.com/templates"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/templates-preview.png"
-              alt="Placeholder preview of templates"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText3}>Templates ➜</h2>
-              <p>
-                Discover and clone template projects showcasing thirdweb
-                features.
-              </p>
-            </div>
-          </a>
-        </div>
+      <h1 className={styles.title}>PWA Vision</h1>
+      {!streamStarted && (
+        <button onClick={getVideoStream} className={styles.button}>
+          Activate Camera
+        </button>
+      )}
+      <div className={styles.camera}>
+        <video
+          ref={videoRef}
+          width="640"
+          height="480"
+          autoPlay
+          playsInline
+          muted // Sometimes necessary to autoplay in certain browsers
+          style={{ display: streamStarted ? 'block' : 'none' }} // Hide the video element until the stream has started
+        />
+        <textarea
+          className={styles.textarea}
+          placeholder="Video description will appear here..."
+          rows={6}
+          readOnly
+        />
       </div>
     </main>
   );
